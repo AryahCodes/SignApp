@@ -1,0 +1,85 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.Python
+backend/env/
+backend/*.egg-info/
+backend/dist/
+backend/build/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Node
+frontend/node_modules/
+frontend/build/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+node_modules/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables
+.env
+*.env
+.env.local
+.env.*.local
+
+# Models and data
+backend/models/*.h5
+backend/models/*.tflite
+backend/data/raw/
+
+# Package lock files (optional - some keep these)
+# frontend/package-lock.json
+
+# Python virtual environment activation scripts
+backend/venv/bin/
+backend/venv/Scripts/
+backend/venv/lib/
+backend/venv/lib64
+backend/venv/include/
+backend/venv/share/
+backend/venv/pyvenv.cfg
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
