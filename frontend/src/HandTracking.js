@@ -1,0 +1,281 @@
+import React, { useRef, useState, useEffect } from 'react';
+import Webcam from 'react-webcam';
+import socket from './socket';
+
+function HandTracking() {
+  const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [handsDetected, setHandsDetected] = useState(0);
+  const [fps, setFps] = useState(0);
+  const intervalRef = useRef(null);
+  const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
+
+  // Draw hand landmarks on canvas
+  const drawHands = (hands) => {
+    const canvas = canvasRef.current;
+    const video = webcamRef.current?.video;
+    
+    if (!canvas || !video) return;
+
+    const ctx = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw each hand
+    hands.forEach((hand) => {
+      const landmarks = hand.landmarks;
+      
+      // Draw connections between landmarks
+      const connections = [
+        // Thumb
+        [0, 1], [1, 2], [2, 3], [3, 4],
+        // Index finger
+        [0, 5], [5, 6], [6, 7], [7, 8],
+        // Middle finger
+        [0, 9], [9, 10], [10, 11], [11, 12],
+        // Ring finger
+        [0, 13], [13, 14], [14, 15], [15, 16],
+        // Pinky
+        [0, 17], [17, 18], [18, 19], [19, 20],
+        // Palm
+        [5, 9], [9, 13], [13, 17]
+      ];
+
+      // Draw connections
+      ctx.strokeStyle = hand.handedness === 'Right' ? '#00FF00' : '#FF00FF';
+      ctx.lineWidth = 2;
+      
+      connections.forEach(([start, end]) => {
+        const startPoint = landmarks[start];
+        const endPoint = landmarks[end];
+        
+        ctx.beginPath();
+        ctx.moveTo(startPoint.x * canvas.width, startPoint.y * canvas.height);
+        ctx.lineTo(endPoint.x * canvas.width, endPoint.y * canvas.height);
+        ctx.stroke();
+      });
+
+      // Draw landmark points
+      landmarks.forEach((landmark, index) => {
+        const x = landmark.x * canvas.width;
+        const y = landmark.y * canvas.height;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = index === 0 ? '#FF0000' : '#00FFFF'; // Red for wrist, cyan for others
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Draw hand label
+      const wrist = landmarks[0];
+      ctx.fillStyle = hand.handedness === 'Right' ? '#00FF00' : '#FF00FF';
+      ctx.font = 'bold 20px Arial';
+      ctx.fillText(
+        `${hand.handedness} Hand`,
+        wrist.x * canvas.width - 40,
+        wrist.y * canvas.height - 10
+      );
+    });
+
+    // Update FPS counter
+    fpsCounterRef.current.frames++;
+    const now = Date.now();
+    const elapsed = now - fpsCounterRef.current.lastTime;
+    
+    if (elapsed >= 1000) {
+      setFps(fpsCounterRef.current.frames);
+      fpsCounterRef.current.frames = 0;
+      fpsCounterRef.current.lastTime = now;
+    }
+  };
+
+  // Listen for hand landmarks from backend
+  useEffect(() => {
+    socket.on('hand_landmarks', (data) => {
+      if (data.success && data.hands_detected > 0) {
+        setHandsDetected(data.hands_detected);
+        drawHands(data.hands);
+      } else {
+        setHandsDetected(0);
+        // Clear canvas when no hands detected
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+    });
+
+    return () => {
+      socket.off('hand_landmarks');
+    };
+  }, []);
+
+  // Start tracking
+  const startTracking = () => {
+    setIsTracking(true);
+    
+    intervalRef.current = setInterval(() => {
+      if (webcamRef.current) {
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (imageSrc) {
+          socket.emit('process_frame', { frame: imageSrc });
+        }
+      }
+    }, 100); // Send frame every 100ms (10 FPS)
+  };
+
+  // Stop tracking
+  const stopTracking = () => {
+    setIsTracking(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setHandsDetected(0);
+    setFps(0);
+    
+    // Clear canvas
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>🤟 Real-Time Hand Tracking</h1>
+      <p style={{ color: '#666', marginBottom: '20px' }}>
+        Phase 2: MediaPipe hand detection with live feedback
+      </p>
+
+      <div style={{ position: 'relative', display: 'inline-block' }}>
+        <Webcam
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          style={{
+            width: '640px',
+            height: '480px',
+            border: '3px solid #007bff',
+            borderRadius: '10px',
+            position: 'relative',
+            zIndex: 1
+          }}
+        />
+        
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '640px',
+            height: '480px',
+            zIndex: 2,
+            pointerEvents: 'none'
+          }}
+        />
+
+        {/* Status overlay */}
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '8px',
+          zIndex: 3,
+          fontSize: '14px',
+          fontFamily: 'monospace'
+        }}>
+          <div>Status: {isTracking ? '🟢 Tracking' : '🔴 Stopped'}</div>
+          <div>Hands: {handsDetected}</div>
+          <div>FPS: {fps}</div>
+        </div>
+      </div>
+
+      <br />
+
+      <div style={{ marginTop: '20px' }}>
+        {!isTracking ? (
+          <button
+            onClick={startTracking}
+            style={{
+              padding: '15px 40px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
+          >
+            ▶️ Start Hand Tracking
+          </button>
+        ) : (
+          <button
+            onClick={stopTracking}
+            style={{
+              padding: '15px 40px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+              transition: 'all 0.3s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#c82333'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#dc3545'}
+          >
+            ⏹️ Stop Tracking
+          </button>
+        )}
+      </div>
+
+      <div style={{
+        marginTop: '30px',
+        padding: '20px',
+        backgroundColor: '#f8f9fa',
+        borderRadius: '10px',
+        maxWidth: '600px',
+        margin: '30px auto'
+      }}>
+        <h3>📋 Instructions:</h3>
+        <ol style={{ textAlign: 'left', lineHeight: '1.8' }}>
+          <li>Click "Start Hand Tracking"</li>
+          <li>Show your hand(s) to the camera</li>
+          <li>Watch the green/purple overlay track your hands!</li>
+          <li>Green = Right hand, Purple = Left hand</li>
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+export default HandTracking;

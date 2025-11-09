@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
-
-// Connect to backend (use port 5001 since that's what you're using)
-const socket = io('http://localhost:5001');
+import socket from './socket';
 
 function SocketTest() {
   const [messages, setMessages] = useState([]);
