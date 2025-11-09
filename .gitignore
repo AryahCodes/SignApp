@@ -83,3 +83,7 @@ coverage/
 dist/
 build/
 *.egg-info/
+
+# training data & model
+backend/models
+backend/training_data

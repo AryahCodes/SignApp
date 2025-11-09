@@ -8,28 +8,33 @@ function SocketTest() {
 
   useEffect(() => {
     // Listen for connection
-    socket.on('connect', () => {
+    const handleConnect = () => {
       console.log('✅ Connected to backend!');
       setIsConnected(true);
-    });
+    };
 
-    // Listen for disconnect
-    socket.on('disconnect', () => {
+    const handleDisconnect = () => {
       console.log('❌ Disconnected from backend');
       setIsConnected(false);
-    });
+    };
 
-    // Listen for responses from backend
-    socket.on('response', (data) => {
+    const handleResponse = (data) => {
       console.log('📩 Received from backend:', data);
       setMessages(prev => [...prev, data.message]);
-    });
+    };
 
-    // Cleanup on unmount
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('response', handleResponse);
+
+    // Check initial connection status
+    setIsConnected(socket.connected);
+
+    // Cleanup
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('response');
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('response', handleResponse);
     };
   }, []);
 

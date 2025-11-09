@@ -8,6 +8,8 @@ function HandTracking() {
   const [isTracking, setIsTracking] = useState(false);
   const [handsDetected, setHandsDetected] = useState(0);
   const [fps, setFps] = useState(0);
+  const [predictedLetter, setPredictedLetter] = useState(null);
+  const [predictionConfidence, setPredictionConfidence] = useState(0);
   const intervalRef = useRef(null);
   const fpsCounterRef = useRef({ frames: 0, lastTime: Date.now() });
 
@@ -102,8 +104,22 @@ function HandTracking() {
       if (data.success && data.hands_detected > 0) {
         setHandsDetected(data.hands_detected);
         drawHands(data.hands);
+        
+        // Update letter prediction if available
+        if (data.letter_prediction) {
+            console.log('📊 Prediction data:', data.letter_prediction);
+            if (data.letter_prediction.success) {
+              setPredictedLetter(data.letter_prediction.letter);
+              setPredictionConfidence(data.letter_prediction.confidence);
+              console.log('✅ Letter set:', data.letter_prediction.letter);
+            }
+          } else {
+            console.log('⚠️ No prediction data');
+          }
       } else {
         setHandsDetected(0);
+        setPredictedLetter(null);
+        setPredictionConfidence(0);
         // Clear canvas when no hands detected
         const canvas = canvasRef.current;
         if (canvas) {
@@ -129,7 +145,7 @@ function HandTracking() {
           socket.emit('process_frame', { frame: imageSrc });
         }
       }
-    }, 100); // Send frame every 100ms (10 FPS)
+    }, 200); // Send frame every 200ms (5 FPS)
   };
 
   // Stop tracking
@@ -141,6 +157,8 @@ function HandTracking() {
     }
     setHandsDetected(0);
     setFps(0);
+    setPredictedLetter(null);
+    setPredictionConfidence(0);
     
     // Clear canvas
     const canvas = canvasRef.current;
@@ -161,9 +179,9 @@ function HandTracking() {
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h1>🤟 Real-Time Hand Tracking</h1>
+      <h1>🤟 Real-Time Hand Tracking & Letter Recognition</h1>
       <p style={{ color: '#666', marginBottom: '20px' }}>
-        Phase 2: MediaPipe hand detection with live feedback
+        Phase 3: ASL letter recognition with live feedback
       </p>
 
       <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -210,6 +228,31 @@ function HandTracking() {
           <div>Hands: {handsDetected}</div>
           <div>FPS: {fps}</div>
         </div>
+
+        {/* Letter prediction overlay - BIG and prominent */}
+        {predictedLetter && (
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(0, 123, 255, 0.9)',
+            color: 'white',
+            padding: '20px 40px',
+            borderRadius: '15px',
+            zIndex: 3,
+            fontSize: '48px',
+            fontWeight: 'bold',
+            fontFamily: 'Arial',
+            border: '3px solid white',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+          }}>
+            <div>Letter: {predictedLetter}</div>
+            <div style={{ fontSize: '24px', marginTop: '10px' }}>
+              {(predictionConfidence * 100).toFixed(0)}% confident
+            </div>
+          </div>
+        )}
       </div>
 
       <br />
@@ -269,10 +312,21 @@ function HandTracking() {
         <h3>📋 Instructions:</h3>
         <ol style={{ textAlign: 'left', lineHeight: '1.8' }}>
           <li>Click "Start Hand Tracking"</li>
-          <li>Show your hand(s) to the camera</li>
-          <li>Watch the green/purple overlay track your hands!</li>
-          <li>Green = Right hand, Purple = Left hand</li>
+          <li>Show your hand to the camera</li>
+          <li>Make an ASL letter sign (A, B, or E)</li>
+          <li>Watch the blue box appear showing the recognized letter!</li>
+          <li>Try different letters and see the confidence percentage</li>
         </ol>
+        <div style={{
+          marginTop: '20px',
+          padding: '15px',
+          backgroundColor: '#d1ecf1',
+          borderRadius: '8px',
+          border: '1px solid #bee5eb'
+        }}>
+          <strong>💡 Tip:</strong> The model was trained on letters A, B, and E. 
+          Go to Training Mode to add more letters!
+        </div>
       </div>
     </div>
   );

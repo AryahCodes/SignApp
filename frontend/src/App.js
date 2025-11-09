@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import HandTracking from './HandTracking';
+import TrainingMode from './TrainingMode';
 import WebcamCapture from './WebcamCapture';
 import SocketTest from './SocketTest';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('tracking'); // 'tracking', 'test', 'socket'
+  const [currentView, setCurrentView] = useState('training'); // Start with training
 
   return (
     <div className="App">
@@ -21,6 +22,22 @@ function App() {
         justifyContent: 'center',
         flexWrap: 'wrap'
       }}>
+        <button
+          onClick={() => setCurrentView('training')}
+          style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            backgroundColor: currentView === 'training' ? '#007bff' : '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px'
+          }}
+        >
+          🎓 Training Mode
+        </button>
+        
         <button
           onClick={() => setCurrentView('tracking')}
           style={{
@@ -78,6 +95,7 @@ function App() {
         margin: '20px',
         boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
       }}>
+        {currentView === 'training' && <TrainingMode />}
         {currentView === 'tracking' && <HandTracking />}
         {currentView === 'test' && <WebcamCapture />}
         {currentView === 'socket' && <SocketTest />}
