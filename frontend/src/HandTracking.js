@@ -106,16 +106,10 @@ function HandTracking() {
         drawHands(data.hands);
         
         // Update letter prediction if available
-        if (data.letter_prediction) {
-            console.log('📊 Prediction data:', data.letter_prediction);
-            if (data.letter_prediction.success) {
-              setPredictedLetter(data.letter_prediction.letter);
-              setPredictionConfidence(data.letter_prediction.confidence);
-              console.log('✅ Letter set:', data.letter_prediction.letter);
-            }
-          } else {
-            console.log('⚠️ No prediction data');
-          }
+        if (data.letter_prediction && data.letter_prediction.success) {
+          setPredictedLetter(data.letter_prediction.letter);
+          setPredictionConfidence(data.letter_prediction.confidence);
+        }
       } else {
         setHandsDetected(0);
         setPredictedLetter(null);
@@ -181,7 +175,7 @@ function HandTracking() {
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h1>🤟 Real-Time Hand Tracking & Letter Recognition</h1>
       <p style={{ color: '#666', marginBottom: '20px' }}>
-        Phase 3: ASL letter recognition with live feedback
+        ASL Alphabet Recognition - 24 Letters (A-Y) with 96.86% Accuracy
       </p>
 
       <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -306,17 +300,18 @@ function HandTracking() {
         padding: '20px',
         backgroundColor: '#f8f9fa',
         borderRadius: '10px',
-        maxWidth: '600px',
+        maxWidth: '800px',
         margin: '30px auto'
       }}>
         <h3>📋 Instructions:</h3>
         <ol style={{ textAlign: 'left', lineHeight: '1.8' }}>
           <li>Click "Start Hand Tracking"</li>
           <li>Show your hand to the camera</li>
-          <li>Make an ASL letter sign (A, B, or E)</li>
+          <li>Make any ASL letter sign (A-Y, excluding J and Z)</li>
           <li>Watch the blue box appear showing the recognized letter!</li>
           <li>Try different letters and see the confidence percentage</li>
         </ol>
+        
         <div style={{
           marginTop: '20px',
           padding: '15px',
@@ -324,8 +319,22 @@ function HandTracking() {
           borderRadius: '8px',
           border: '1px solid #bee5eb'
         }}>
-          <strong>💡 Tip:</strong> The model was trained on letters A, B, and E. 
-          Go to Training Mode to add more letters!
+          <strong>🎉 Model Info:</strong> Trained on 9,572 Kaggle samples with 96.86% accuracy!
+          <br />
+          <strong>🔤 Recognizes:</strong> A, B, C, D, E, F, G, H, I, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y
+          <br />
+          <strong>📊 Best Performance:</strong> D, F, K, Y (91-94% accuracy)
+        </div>
+
+        <div style={{
+          marginTop: '15px',
+          padding: '15px',
+          backgroundColor: '#fff3cd',
+          borderRadius: '8px',
+          border: '1px solid #ffc107'
+        }}>
+          <strong>💡 Tip:</strong> Hold your hand steady for 2-3 seconds for best results. 
+          Keep your hand centered and well-lit!
         </div>
       </div>
     </div>
