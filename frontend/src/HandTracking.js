@@ -139,7 +139,7 @@ function HandTracking() {
           socket.emit('process_frame', { frame: imageSrc });
         }
       }
-    }, 200); // Send frame every 200ms (5 FPS)
+    }, 100); // Send frame every 100ms (10 FPS)
   };
 
   // Stop tracking
