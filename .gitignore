@@ -95,6 +95,7 @@ letter_classifier.py/
 train_kaggle_model.pyc
 models/
 
+
 echo "*.zip" >> .gitignore
 echo "synthetic-asl-alphabet.zip" >> .gitignore
 echo "asl-alphabet.zip" >> .gitignore
