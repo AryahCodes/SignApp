@@ -1,100 +1,212 @@
-# Sign Language Learning App
+# 🤟 SignApp - Real-Time ASL Alphabet Recognition
 
-An interactive ASL (American Sign Language) learning application using hand tracking and machine learning.
+![Demo Screenshot](path/to/screenshot.png)
+
+An interactive American Sign Language (ASL) learning application using real-time hand tracking and deep learning for letter recognition.
 
 ## 🎯 Features
-- Real-time hand tracking with MediaPipe
-- Letter recognition (A-Z)
-- Word recognition
-- Interactive learning modes
 
-## 🛠️ Tech Stack
-- **Frontend**: React, Socket.IO, Webcam
-- **Backend**: Python, Flask, MediaPipe, TensorFlow
-- **ML**: MediaPipe Hands, Custom gesture recognition models
+- **Real-time Hand Tracking** with MediaPipe
+- **ASL Alphabet Recognition** (A-Y, 24 letters)
+- **96.86% Test Accuracy** using professional deep learning model
+- **Interactive Learning Modes**
+  - Hand Tracking: Real-time letter recognition
+  - Training Mode: Collect custom training data
+- **Professional ML Pipeline**
+  - Z-score normalization for camera-distance invariance
+  - Temporal smoothing for stable predictions
+  - Frame buffering for robust recognition
+  - SigNN-inspired neural network architecture
 
-## 📦 Setup Instructions
+## 🚀 Tech Stack
+
+### Frontend
+- React + TypeScript
+- Socket.IO for real-time communication
+- MediaPipe Hands (browser-based hand tracking)
+- Tailwind CSS
+
+### Backend
+- Python + Flask
+- TensorFlow/Keras (Deep Learning)
+- MediaPipe (Hand landmark detection)
+- Socket.IO
+- Eventlet (Async support)
+
+### ML Architecture
+- **Model:** Deep Neural Network (SigNN-based)
+  - 900 → 400 → 200 → 24 neurons
+  - Batch normalization + Dropout
+  - ReLU and Tanh activations
+- **Features:** 78 engineered features
+  - Z-score normalized coordinates
+  - Finger angles and extension ratios
+  - Inter-finger spacing
+  - Hand direction and palm size
+- **Accuracy:** 96.86% on test set (9,572 samples)
+
+## 📊 Performance
+
+| Metric | Value |
+|--------|-------|
+| Test Accuracy | 96.86% |
+| Real-time FPS | 10 FPS |
+| Confidence (avg) | 65-75% |
+| Letters Supported | 24 (A-Y) |
+| Training Samples | 9,572 |
+
+## 🛠️ Installation
+
+### Prerequisites
+- Python 3.8+
+- Node.js 16+
+- Webcam
 
 ### Backend Setup
 ```bash
 cd backend
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-python server.py
 ```
 
 ### Frontend Setup
 ```bash
 cd frontend
 npm install
+```
+
+## 🎮 Usage
+
+### Start Backend
+```bash
+cd backend
+source venv/bin/activate
+python server.py
+```
+
+### Start Frontend
+```bash
+cd frontend
 npm start
 ```
 
-## 📊 Project Status
-🚧 **Phase 1**: Environment Setup - In Progress
+Visit `http://localhost:3000`
 
-## 📚 Resources
-- [MediaPipe Documentation](https://google.github.io/mediapipe/)
-- [React Documentation](https://react.dev/)
-- [Flask-SocketIO Documentation](https://flask-socketio.readthedocs.io/)
+## 🧠 How It Works
 
-## 👤 Author
-AryahCodes
+### 1. Hand Tracking
+MediaPipe detects 21 hand landmarks in real-time from webcam feed
 
-## 📝 License
-This project is open source and available under the MIT License.
+### 2. Feature Extraction
+- Extract 78 features from landmarks
+- Apply z-score normalization
+- Calculate finger angles and extensions
+
+### 3. Prediction Pipeline
+```
+Raw Frame → MediaPipe → Landmarks → Feature Extraction → 
+Z-Score Norm → Frame Buffer (10 frames) → Model Prediction → 
+Temporal Smoothing (7 frames) → Confidence Threshold (50%) → Display
 ```
 
-3. Save (Cmd+S)
-
----
-
-### **STEP 2: Create .gitignore**
-
-1. Right-click in the empty space in the EXPLORER panel (left side)
-2. Click "New File"
-3. Name it `.gitignore`
-4. Paste this content:
+### 4. Model Architecture
+```python
+Input (78 features)
+    ↓
+Dense(900) + BatchNorm + Dropout(0.15)
+    ↓
+Dense(400) + BatchNorm + Dropout(0.25)
+    ↓
+Dense(200) + Dropout(0.4)
+    ↓
+Dense(24) + Softmax
 ```
-# Python
-backend/venv/
-backend/__pycache__/
-backend/*.pyc
-backend/*.pyo
-backend/*.pyd
-backend/.Python
-backend/env/
-backend/*.egg-info/
-backend/dist/
-backend/build/
 
-# Node
-frontend/node_modules/
-frontend/build/
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
+## 📚 Training Your Own Model
 
-# OS files
-.DS_Store
-Thumbs.db
+### Using Kaggle Data (Recommended)
+```bash
+cd backend
+python train_professional_kaggle.py
+```
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+### Using Custom Data
+1. Go to Training Mode in the app
+2. Collect 30-50 samples per letter
+3. Click "Train Model"
 
-# Environment variables
-.env
-*.env
+## 🎨 Project Structure
+```
+SignApp/
+├── backend/
+│   ├── server.py                      # Flask server + Socket.IO
+│   ├── hand_processor.py              # MediaPipe hand tracking
+│   ├── feature_extractor.py           # Feature engineering
+│   ├── professional_letter_classifier.py  # TensorFlow model
+│   ├── train_professional_kaggle.py   # Training script
+│   └── models/
+│       ├── professional_model.h5      # Trained model
+│       └── professional_labels.json   # Label mappings
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── HandTracking.jsx       # Main recognition UI
+│   │   │   └── TrainingMode.jsx       # Data collection UI
+│   │   └── App.jsx
+│   └── package.json
+└── README.md
+```
 
-# Models and data
-backend/models/*.h5
-backend/models/*.tflite
-backend/data/raw/
+## 🔬 Technical Deep Dive
+
+### Z-Score Normalization
+Removes camera distance variance by normalizing landmark coordinates:
+```python
+x_normalized = (x - mean(x)) / std(x)
+```
+
+### Temporal Smoothing
+Uses sliding window (7 frames) to require consistent predictions:
+- Letter must appear in 40%+ of window
+- Confidence must average > 50%
+
+### Frame Buffering
+Averages landmarks over 10 frames before prediction for stability
+
+## 🐛 Known Issues
+
+- Letters D, M, N, G have lower accuracy (~60-70%)
+  - These letters have very similar hand shapes
+  - Industry-wide challenge in ASL recognition
+- Dynamic letters J and Z not supported (require temporal LSTM)
+
+## 🚀 Future Enhancements
+
+- [ ] Word mode (string multiple letters)
+- [ ] Phrase recognition
+- [ ] LSTM for dynamic gestures (J, Z)
+- [ ] Multi-hand support
+- [ ] Mobile app deployment
+- [ ] User progress tracking
+
+## 📖 References
+
+- [SigNN Research Paper](https://github.com/AriAlavi/SigNN)
+- [MediaPipe Hands](https://google.github.io/mediapipe/solutions/hands)
+- [FreeCodeCamp ASL Tutorial](https://www.freecodecamp.org/news/create-a-real-time-gesture-to-text-translator/)
+
+## 👨‍💻 Author
+
+[Aryahvishwa Babu](https://github.com/AryahCodes)
+
+## 📄 License
+
+MIT License
+
+## 🙏 Acknowledgments
+
+- Kaggle ASL Alphabet Dataset
+- SigNN Research Team
+- MediaPipe Team
+- FreeCodeCamp Community
