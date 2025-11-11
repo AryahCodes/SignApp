@@ -51,20 +51,14 @@ Thumbs.db
 
 # Models and data
 backend/models/*.h5
+backend/models/*.pkl
 backend/models/*.tflite
 backend/data/raw/
+models/
 
-# Package lock files (optional - some keep these)
-# frontend/package-lock.json
-
-# Python virtual environment activation scripts
-backend/venv/bin/
-backend/venv/Scripts/
-backend/venv/lib/
-backend/venv/lib64
-backend/venv/include/
-backend/venv/share/
-backend/venv/pyvenv.cfg
+# Python virtual environment
+backend/venv/
+venv/
 
 # Log files
 *.log
@@ -84,19 +78,14 @@ dist/
 build/
 *.egg-info/
 
-# training data & model
-backend/training_data
-
-#dataset and training dataset
+# Training data & datasets
+backend/training_data/
 asl_alphabet_data/
 kaggle_processed/
 asl_alphabet_synthetic/
-letter_classifier.py/
-train_kaggle_model.pyc
-models/
 
-
-echo "*.zip" >> .gitignore
-echo "synthetic-asl-alphabet.zip" >> .gitignore
-echo "asl-alphabet.zip" >> .gitignore
-
+# Large files
+*.zip
+*.h5
+synthetic-asl-alphabet.zip
+asl-alphabet.zip
