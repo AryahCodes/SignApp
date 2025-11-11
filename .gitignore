@@ -85,10 +85,11 @@ build/
 *.egg-info/
 
 # training data & model
-backend/models
 backend/training_data
 
 #dataset and training dataset
 asl_alphabet_data/
 kaggle_processed/
 asl_alphabet_synthetic/
+letter_classifier.py/
+train_kaggle_model.pyc
