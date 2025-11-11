@@ -463,7 +463,10 @@ def default_error_handler(e):
 # Run server
 # -------------------------------------------------
 if __name__ == "__main__":
-    print("\n🌐 Server starting on http://localhost:5001")
+    import os
+    port = int(os.environ.get("PORT", 5001))
+    
+    print(f"\n🌐 Server starting on port {port}")
     print("📡 Socket.IO enabled for real-time communication")
     print("🤖 MediaPipe hand tracking active")
     print("🎓 Ready for real-time letter recognition")
@@ -473,7 +476,7 @@ if __name__ == "__main__":
         socketio.run(
             app,
             host="0.0.0.0",
-            port=5001,
+            port=port,  # ← Use dynamic port
             debug=False,
             use_reloader=False
         )
