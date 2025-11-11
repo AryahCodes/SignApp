@@ -93,3 +93,4 @@ kaggle_processed/
 asl_alphabet_synthetic/
 letter_classifier.py/
 train_kaggle_model.pyc
+models/
