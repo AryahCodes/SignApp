@@ -1,7 +1,8 @@
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
+import BACKEND_URL from './config';
 
 // More aggressive connection settings
-const socket = io('http://localhost:5001', {
+const socket = io(BACKEND_URL, {
   transports: ['websocket', 'polling'],
   reconnection: true,
   reconnectionDelay: 500,
