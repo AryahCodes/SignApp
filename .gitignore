@@ -92,3 +92,4 @@ asl-alphabet.zip
 
 backend/models/**
 !backend/models/professional_model.h5
+backend/convert_to_tflite.py

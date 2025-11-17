@@ -20,7 +20,7 @@ class ProfessionalLetterClassifier:
         self.feature_extractor = None
         print("✅ ProfessionalLetterClassifier initialized")
     
-    def load_model(self, model_path='models/professional_model.h5'):
+    def load_model(self, model_path='models/professional_model.tflite'):
         """Load the trained professional model"""
         try:
             model_path = Path(model_path)
@@ -31,7 +31,11 @@ class ProfessionalLetterClassifier:
                 return False
             
             # Load TensorFlow model
-            self.model = keras.models.load_model(model_path)
+            self.interpreter = tf.lite.Interpreter(model_path=str(model_path))
+            self.interpreter.allocate_tensors()
+            self.input_index = self.interpreter.get_input_details()[0]['index']
+            self.output_index = self.interpreter.get_output_details()[0]['index']
+
             print(f"✅ Loaded professional model from {model_path}")
             
             # Load label mappings
@@ -80,7 +84,7 @@ class ProfessionalLetterClassifier:
         Returns:
             dict with 'success', 'letter', 'confidence', 'probabilities'
         """
-        if not self.is_trained or self.model is None:
+        if not self.is_trained or self.interpreter is None:
             return {
                 'success': False,
                 'error': 'Model not trained',
@@ -104,7 +108,10 @@ class ProfessionalLetterClassifier:
             features = features.reshape(1, -1)
             
             # Get prediction probabilities
-            probabilities = self.model.predict(features, verbose=0)[0]
+            self.interpreter.set_tensor(self.input_index, features.astype(np.float32))
+            self.interpreter.invoke()
+            probabilities = self.interpreter.get_tensor(self.output_index)[0]
+
             
             # Get predicted class
             predicted_idx = np.argmax(probabilities)
@@ -143,7 +150,7 @@ class ProfessionalLetterClassifier:
                 'confidence': 0.0
             }
     
-    def save_model(self, model_path='models/professional_model.h5'):
+    def save_model(self, model_path='models/professional_model.tflite'):
         """Model is already saved by TensorFlow during training"""
         print(f"💾 Professional model saved at {model_path}")
         return True
