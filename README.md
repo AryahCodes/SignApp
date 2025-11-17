@@ -161,6 +161,10 @@ https://signapp-frontend.vercel.app/
 
 An interactive American Sign Language (ASL) learning application using real-time hand tracking and deep learning for letter recognition.
 
+NOTE:
+Live backend temporarily disabled due to TFLite deployment constraints on free hosting. So while Frontend is deployed on Vercel, it won't connect to the backend and won't work properly. 
+Good news: Model runs locally and is fully implemented; conversion & serving code included.
+
 ## 🎯 Features
 
 - **Real-time Hand Tracking** with MediaPipe
