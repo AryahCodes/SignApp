@@ -89,3 +89,6 @@ asl_alphabet_synthetic/
 *.h5
 synthetic-asl-alphabet.zip
 asl-alphabet.zip
+
+backend/models/**
+!backend/models/professional_model.h5
